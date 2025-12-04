@@ -4,10 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.aaronpender.pillcount',
   appName: 'PillCount',
   webDir: 'dist',
-  server: {
-    url: 'https://d121648c-b8ea-4eb0-b5b4-2c184b1e6ba8.lovableproject.com?forceHideBadge=true',
-    cleartext: true
-  },
+  // server block removed for production build
   plugins: {
     Camera: {
       // iOS camera permissions are configured in Info.plist
