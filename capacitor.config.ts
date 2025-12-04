@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.yourcompany.pillcount', // TODO: Replace with your registered Apple bundle ID
+  appId: 'com.aaronpender.pillcount',
   appName: 'PillCount',
   webDir: 'dist',
   server: {
