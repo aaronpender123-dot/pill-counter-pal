@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Camera as CameraComponent } from '@/components/Camera';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { HealthDisclaimer } from '@/components/HealthDisclaimer';
 
 interface CountResult {
   count: number;
@@ -212,13 +213,18 @@ export function PillCounter() {
         </main>
 
         {/* Tips */}
-        <footer className="text-center text-sm text-muted-foreground space-y-2 animate-fade-in">
-          <p className="font-medium">Tips for accurate counting:</p>
-          <ul className="space-y-1">
-            <li>• Use good lighting (natural light works best)</li>
-            <li>• Spread pills apart to avoid overlap</li>
-            <li>• Use a contrasting background</li>
-          </ul>
+        <footer className="text-center text-sm text-muted-foreground space-y-4 animate-fade-in">
+          <div className="space-y-2">
+            <p className="font-medium">Tips for accurate counting:</p>
+            <ul className="space-y-1">
+              <li>• Use good lighting (natural light works best)</li>
+              <li>• Spread pills apart to avoid overlap</li>
+              <li>• Use a contrasting background</li>
+            </ul>
+          </div>
+          
+          {/* Health Disclaimer */}
+          <HealthDisclaimer />
         </footer>
       </div>
     </div>
