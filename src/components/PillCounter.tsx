@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { HealthDisclaimer } from '@/components/HealthDisclaimer';
 import { CapsuleLogo } from '@/components/CapsuleLogo';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface CountResult {
   count: number;
@@ -89,6 +90,11 @@ export function PillCounter() {
 
   return (
     <div className="min-h-screen gradient-surface">
+      {/* Theme Toggle - Fixed position */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       {showCamera && (
         <CameraComponent
           onCapture={handleCapture}
