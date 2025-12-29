@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Camera as CameraComponent } from '@/components/Camera';
@@ -8,10 +8,16 @@ import { HealthDisclaimer } from '@/components/HealthDisclaimer';
 import { CapsuleLogo } from '@/components/CapsuleLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
+interface PillPosition {
+  x: number;
+  y: number;
+}
+
 interface CountResult {
   count: number;
   confidence: 'high' | 'medium' | 'low';
   notes: string;
+  pills: PillPosition[];
 }
 
 export function PillCounter() {
@@ -19,7 +25,23 @@ export function PillCounter() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<CountResult | null>(null);
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Update image dimensions when the image loads or container resizes
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (imageContainerRef.current) {
+        const rect = imageContainerRef.current.getBoundingClientRect();
+        setImageDimensions({ width: rect.width, height: rect.height });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, [capturedImage, result]);
 
   const handleCapture = async (imageData: string) => {
     setShowCamera(false);
@@ -40,7 +62,13 @@ export function PillCounter() {
         throw new Error(data.error);
       }
 
-      setResult(data);
+      // Ensure pills array exists
+      const resultWithPills = {
+        ...data,
+        pills: data.pills || []
+      };
+
+      setResult(resultWithPills);
       toast({
         title: 'Count Complete',
         description: `Found ${data.count} pill${data.count !== 1 ? 's' : ''} with ${data.confidence} confidence.`,
@@ -61,7 +89,6 @@ export function PillCounter() {
     setCapturedImage(null);
     setResult(null);
   };
-
 
   const getConfidenceColor = (confidence: string) => {
     switch (confidence) {
@@ -153,19 +180,54 @@ export function PillCounter() {
           ) : (
             /* Image Captured - Show Results */
             <div className="space-y-6">
-              {/* Captured Image */}
-              <div className="relative rounded-3xl overflow-hidden shadow-card animate-scale-in">
+              {/* Captured Image with Pill Markers */}
+              <div 
+                ref={imageContainerRef}
+                className="relative rounded-3xl overflow-hidden shadow-card animate-scale-in"
+              >
                 <img
                   src={capturedImage}
                   alt="Captured pills"
                   className="w-full aspect-[4/3] object-cover"
+                  onLoad={() => {
+                    // Force dimension update when image loads
+                    if (imageContainerRef.current) {
+                      const rect = imageContainerRef.current.getBoundingClientRect();
+                      setImageDimensions({ width: rect.width, height: rect.height });
+                    }
+                  }}
                 />
+                
+                {/* Pill Markers Overlay */}
+                {result && result.pills && result.pills.length > 0 && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    {result.pills.map((pill, index) => (
+                      <div
+                        key={index}
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2 animate-pulse"
+                        style={{
+                          left: `${pill.x}%`,
+                          top: `${pill.y}%`,
+                        }}
+                      >
+                        {/* Outer glow ring */}
+                        <div className="absolute inset-0 w-8 h-8 -m-4 rounded-full bg-primary/30 animate-ping" />
+                        {/* Main marker dot */}
+                        <div className="relative w-6 h-6 rounded-full bg-primary border-2 border-background shadow-lg flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-primary-foreground">
+                            {index + 1}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 
                 {isProcessing && (
                   <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm flex items-center justify-center">
                     <div className="text-center space-y-4">
                       <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
-                      <p className="text-background font-medium">Analyzing image...</p>
+                      <p className="text-background font-medium">Detecting pills...</p>
                     </div>
                   </div>
                 )}
@@ -179,6 +241,11 @@ export function PillCounter() {
                     <div className="text-xl text-muted-foreground">
                       pill{result.count !== 1 ? 's' : ''} detected
                     </div>
+                    {result.pills && result.pills.length > 0 && (
+                      <p className="text-sm text-primary mt-2">
+                        Each pill is marked with a numbered dot above
+                      </p>
+                    )}
                   </div>
                   
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary ${getConfidenceColor(result.confidence)}`}>

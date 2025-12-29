@@ -22,7 +22,7 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Processing image for pill counting...');
+    console.log('Processing image for pill counting with positions...');
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -35,41 +35,50 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert pill counting assistant with exceptional attention to detail. Your task is to accurately count every pill, tablet, or capsule in an image.
+            content: `You are an expert pill detection and counting assistant. Your task is to accurately identify and locate every pill, tablet, or capsule in an image.
 
-COUNTING METHOD - Follow these steps precisely:
-1. Mentally divide the image into quadrants (top-left, top-right, bottom-left, bottom-right)
-2. Count the pills in each quadrant separately
-3. Add up the totals from all quadrants
-4. Double-check by counting again using a different method (e.g., by rows or columns)
-5. If the two counts differ, count a third time and use the most common result
+CRITICAL TASK: You must return the EXACT position of each pill as a percentage of image dimensions.
+
+DETECTION METHOD - Follow these steps precisely:
+1. Scan the entire image systematically from left to right, top to bottom
+2. For EACH pill you find, estimate its CENTER position as:
+   - x: percentage from left edge (0 = left edge, 100 = right edge)
+   - y: percentage from top edge (0 = top edge, 100 = bottom edge)
+3. Count every single pill, even partially visible ones
+4. Double-check by scanning again in a different pattern
 
 IMPORTANT GUIDELINES:
-- Count EVERY pill, even if partially obscured or at the edges
-- Pills that are overlapping still count as separate pills
-- Shadows are NOT pills - only count actual physical objects
-- Reflections are NOT pills - only count once
-- Broken pill pieces: count as 1 if more than half visible, 0 if less than half
-- Be especially careful with pills of similar colors to the background
+- Mark EVERY pill, even if partially obscured or at the edges
+- Pills that are overlapping still get separate markers
+- Shadows are NOT pills - only mark actual physical objects
+- Reflections are NOT pills - only mark once
+- Be especially careful with pills similar in color to the background
+- Position estimates should be as accurate as possible
 
 CONFIDENCE LEVELS:
-- "high": Clear image, pills well separated, easy to count, you are certain
-- "medium": Some overlapping or partial visibility, but count is likely accurate
+- "high": Clear image, pills well separated, positions are accurate
+- "medium": Some overlapping or partial visibility
 - "low": Poor lighting, many overlapping pills, or unclear image
 
-Respond ONLY with valid JSON:
+Respond ONLY with valid JSON in this exact format:
 {
-  "count": <exact number>,
+  "count": <exact number of pills>,
   "confidence": "<high|medium|low>",
-  "notes": "<brief note about pill type, color, or any counting challenges>"
-}`
+  "notes": "<brief note about pill type, color, or any counting challenges>",
+  "pills": [
+    {"x": <percentage 0-100>, "y": <percentage 0-100>},
+    {"x": <percentage 0-100>, "y": <percentage 0-100>}
+  ]
+}
+
+The "pills" array must have exactly as many entries as the count.`
           },
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: 'Count all pills in this image. Use the quadrant method: divide into 4 sections, count each section, then sum the totals. Double-check your count.'
+                text: 'Detect and locate all pills in this image. For each pill, provide its center position as x,y percentages. Be thorough and mark every single pill you can see.'
               },
               {
                 type: 'image_url',
@@ -118,6 +127,18 @@ Respond ONLY with valid JSON:
       } else {
         throw new Error('No JSON found in response');
       }
+      
+      // Ensure pills array exists
+      if (!result.pills || !Array.isArray(result.pills)) {
+        result.pills = [];
+      }
+      
+      // Validate pill positions
+      result.pills = result.pills.map((pill: any) => ({
+        x: Math.min(100, Math.max(0, Number(pill.x) || 50)),
+        y: Math.min(100, Math.max(0, Number(pill.y) || 50))
+      }));
+      
     } catch (parseError) {
       console.error('Parse error:', parseError);
       // Fallback: try to extract number from text
@@ -125,7 +146,8 @@ Respond ONLY with valid JSON:
       result = {
         count: numberMatch ? parseInt(numberMatch[0]) : 0,
         confidence: 'low',
-        notes: 'Could not parse structured response'
+        notes: 'Could not parse structured response',
+        pills: []
       };
     }
 
