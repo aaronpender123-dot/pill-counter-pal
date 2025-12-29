@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Camera as CameraComponent } from '@/components/Camera';
 import { useToast } from '@/hooks/use-toast';
@@ -60,6 +60,13 @@ export function PillCounter() {
   const reset = () => {
     setCapturedImage(null);
     setResult(null);
+  };
+
+  const adjustCount = (delta: number) => {
+    if (result) {
+      const newCount = Math.max(0, result.count + delta);
+      setResult({ ...result, count: newCount });
+    }
   };
 
   const getConfidenceColor = (confidence: string) => {
@@ -174,10 +181,32 @@ export function PillCounter() {
               {result && (
                 <div className="bg-card rounded-3xl shadow-card p-8 text-center space-y-4 animate-scale-in">
                   <div className="animate-count-reveal">
-                    <div className="text-7xl font-bold text-foreground">{result.count}</div>
-                    <div className="text-xl text-muted-foreground">
+                    <div className="flex items-center justify-center gap-4">
+                      <Button
+                        onClick={() => adjustCount(-1)}
+                        variant="outline"
+                        size="icon"
+                        className="h-14 w-14 rounded-full text-xl font-bold"
+                        disabled={result.count <= 0}
+                      >
+                        <Minus className="h-6 w-6" />
+                      </Button>
+                      <div className="text-7xl font-bold text-foreground min-w-[120px]">{result.count}</div>
+                      <Button
+                        onClick={() => adjustCount(1)}
+                        variant="outline"
+                        size="icon"
+                        className="h-14 w-14 rounded-full text-xl font-bold"
+                      >
+                        <Plus className="h-6 w-6" />
+                      </Button>
+                    </div>
+                    <div className="text-xl text-muted-foreground mt-2">
                       pill{result.count !== 1 ? 's' : ''} detected
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Tap +/- to adjust if needed
+                    </p>
                   </div>
                   
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary ${getConfidenceColor(result.confidence)}`}>
