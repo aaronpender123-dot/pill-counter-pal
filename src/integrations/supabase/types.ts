@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pill_training_data: {
+        Row: {
+          ai_confidence: string
+          ai_count: number
+          corrected_count: number | null
+          created_at: string
+          id: string
+          image_path: string
+          notes: string | null
+        }
+        Insert: {
+          ai_confidence: string
+          ai_count: number
+          corrected_count?: number | null
+          created_at?: string
+          id?: string
+          image_path: string
+          notes?: string | null
+        }
+        Update: {
+          ai_confidence?: string
+          ai_count?: number
+          corrected_count?: number | null
+          created_at?: string
+          id?: string
+          image_path?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
