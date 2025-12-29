@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Camera as CameraComponent } from '@/components/Camera';
+import { LiveCamera } from '@/components/LiveCamera';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { HealthDisclaimer } from '@/components/HealthDisclaimer';
@@ -22,6 +23,7 @@ interface CountResult {
 
 export function PillCounter() {
   const [showCamera, setShowCamera] = useState(false);
+  const [showLiveCamera, setShowLiveCamera] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<CountResult | null>(null);
@@ -130,6 +132,10 @@ export function PillCounter() {
         />
       )}
 
+      {showLiveCamera && (
+        <LiveCamera onClose={() => setShowLiveCamera(false)} />
+      )}
+
       <div className="container max-w-lg mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <header className="text-center space-y-2 animate-fade-in">
@@ -159,7 +165,17 @@ export function PillCounter() {
                 className="w-full"
               >
                 <Camera className="h-6 w-6" />
-                Open Camera
+                Take Photo
+              </Button>
+              
+              <Button
+                onClick={() => setShowLiveCamera(true)}
+                variant="outline"
+                size="lg"
+                className="w-full"
+              >
+                <Video className="h-5 w-5" />
+                Live Count Mode
               </Button>
 
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
