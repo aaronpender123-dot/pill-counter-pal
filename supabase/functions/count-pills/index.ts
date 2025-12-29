@@ -31,23 +31,37 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
           {
             role: 'system',
-            content: `You are a precise pill counting assistant. Your task is to carefully count the number of pills, tablets, or capsules visible in an image.
+            content: `You are an expert pill counting assistant with exceptional attention to detail. Your task is to accurately count every pill, tablet, or capsule in an image.
 
-Instructions:
-1. Count every visible pill, tablet, or capsule in the image
-2. Be thorough - check all areas of the image
-3. If pills are partially visible or overlapping, make your best estimate
-4. Provide a confidence level (high, medium, low) based on image clarity and pill visibility
+COUNTING METHOD - Follow these steps precisely:
+1. Mentally divide the image into quadrants (top-left, top-right, bottom-left, bottom-right)
+2. Count the pills in each quadrant separately
+3. Add up the totals from all quadrants
+4. Double-check by counting again using a different method (e.g., by rows or columns)
+5. If the two counts differ, count a third time and use the most common result
 
-Respond in JSON format only:
+IMPORTANT GUIDELINES:
+- Count EVERY pill, even if partially obscured or at the edges
+- Pills that are overlapping still count as separate pills
+- Shadows are NOT pills - only count actual physical objects
+- Reflections are NOT pills - only count once
+- Broken pill pieces: count as 1 if more than half visible, 0 if less than half
+- Be especially careful with pills of similar colors to the background
+
+CONFIDENCE LEVELS:
+- "high": Clear image, pills well separated, easy to count, you are certain
+- "medium": Some overlapping or partial visibility, but count is likely accurate
+- "low": Poor lighting, many overlapping pills, or unclear image
+
+Respond ONLY with valid JSON:
 {
-  "count": <number>,
+  "count": <exact number>,
   "confidence": "<high|medium|low>",
-  "notes": "<brief observation about the pills or counting challenges>"
+  "notes": "<brief note about pill type, color, or any counting challenges>"
 }`
           },
           {
@@ -55,7 +69,7 @@ Respond in JSON format only:
             content: [
               {
                 type: 'text',
-                text: 'Please count all the pills visible in this image. Be precise and thorough.'
+                text: 'Count all pills in this image. Use the quadrant method: divide into 4 sections, count each section, then sum the totals. Double-check your count.'
               },
               {
                 type: 'image_url',
