@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Camera, RotateCcw, Pill, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Camera as CameraComponent } from '@/components/Camera';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { HealthDisclaimer } from '@/components/HealthDisclaimer';
+import { CapsuleLogo } from '@/components/CapsuleLogo';
 
 interface CountResult {
   count: number;
@@ -99,7 +100,7 @@ export function PillCounter() {
         {/* Header */}
         <header className="text-center space-y-2 animate-fade-in">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary shadow-soft mb-4">
-            <Pill className="h-8 w-8 text-primary-foreground" />
+            <CapsuleLogo size="lg" />
           </div>
           <h1 className="text-3xl font-bold text-foreground">PillCount</h1>
           <p className="text-muted-foreground">AI-powered pill counting for accuracy you can trust</p>

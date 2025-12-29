@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Pill, Camera, AlertTriangle, Shield, ChevronRight } from 'lucide-react';
+import { Camera, AlertTriangle, Shield, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
+import { CapsuleLogo } from '@/components/CapsuleLogo';
 
 interface OnboardingProps {
   onComplete: () => void;
@@ -14,7 +15,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
   const steps = [
     {
-      icon: Pill,
+      icon: 'capsule' as const,
       title: 'Welcome to PillCount',
       description: 'AI-powered pill counting for quick and easy reference counts.',
     },
@@ -44,7 +45,15 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   const isLastStep = currentStep === steps.length - 1;
-  const CurrentIcon = steps[currentStep].icon;
+  const currentStepData = steps[currentStep];
+
+  const renderIcon = () => {
+    if (currentStepData.icon === 'capsule') {
+      return <CapsuleLogo size="xl" />;
+    }
+    const IconComponent = currentStepData.icon;
+    return <IconComponent className="h-12 w-12 text-primary-foreground" />;
+  };
 
   return (
     <div className="min-h-screen gradient-surface flex flex-col">
@@ -68,7 +77,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         {/* Content */}
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-fade-in">
           <div className="w-24 h-24 rounded-3xl gradient-primary shadow-soft flex items-center justify-center">
-            <CurrentIcon className="h-12 w-12 text-primary-foreground" />
+            {renderIcon()}
           </div>
 
           <div className="space-y-4">
