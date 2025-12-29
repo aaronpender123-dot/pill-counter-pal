@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2, Video } from 'lucide-react';
+import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2, Video, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Camera as CameraComponent } from '@/components/Camera';
 import { LiveCamera } from '@/components/LiveCamera';
+import { ContributeDialog } from '@/components/ContributeDialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { HealthDisclaimer } from '@/components/HealthDisclaimer';
@@ -24,6 +25,7 @@ interface CountResult {
 export function PillCounter() {
   const [showCamera, setShowCamera] = useState(false);
   const [showLiveCamera, setShowLiveCamera] = useState(false);
+  const [showContributeDialog, setShowContributeDialog] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<CountResult | null>(null);
@@ -278,26 +280,41 @@ export function PillCounter() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-4">
-                <Button
-                  onClick={reset}
-                  variant="outline"
-                  size="lg"
-                  className="flex-1"
-                >
-                  <RotateCcw className="h-5 w-5" />
-                  New Count
-                </Button>
-                <Button
-                  onClick={() => setShowCamera(true)}
-                  variant="capture"
-                  size="lg"
-                  className="flex-1"
-                  disabled={isProcessing}
-                >
-                  <Camera className="h-5 w-5" />
-                  Retake
-                </Button>
+              <div className="flex flex-col gap-3">
+                <div className="flex gap-4">
+                  <Button
+                    onClick={reset}
+                    variant="outline"
+                    size="lg"
+                    className="flex-1"
+                  >
+                    <RotateCcw className="h-5 w-5" />
+                    New Count
+                  </Button>
+                  <Button
+                    onClick={() => setShowCamera(true)}
+                    variant="capture"
+                    size="lg"
+                    className="flex-1"
+                    disabled={isProcessing}
+                  >
+                    <Camera className="h-5 w-5" />
+                    Retake
+                  </Button>
+                </div>
+                
+                {/* Contribute Button */}
+                {result && (
+                  <Button
+                    onClick={() => setShowContributeDialog(true)}
+                    variant="secondary"
+                    size="lg"
+                    className="w-full"
+                  >
+                    <Heart className="h-5 w-5" />
+                    Help Improve AI
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -318,6 +335,18 @@ export function PillCounter() {
           <HealthDisclaimer />
         </footer>
       </div>
+
+      {/* Contribute Dialog */}
+      {capturedImage && result && (
+        <ContributeDialog
+          open={showContributeDialog}
+          onOpenChange={setShowContributeDialog}
+          imageData={capturedImage}
+          aiCount={result.count}
+          confidence={result.confidence}
+          notes={result.notes}
+        />
+      )}
     </div>
   );
 }
