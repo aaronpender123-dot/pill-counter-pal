@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2, Video, Heart } from 'lucide-react';
+import { Camera, RotateCcw, AlertCircle, CheckCircle2, Loader2, Video, Heart, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Camera as CameraComponent } from '@/components/Camera';
 import { LiveCamera } from '@/components/LiveCamera';
 import { ContributeDialog } from '@/components/ContributeDialog';
+import { BulkUploadDialog } from '@/components/BulkUploadDialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { HealthDisclaimer } from '@/components/HealthDisclaimer';
@@ -26,6 +27,7 @@ export function PillCounter() {
   const [showCamera, setShowCamera] = useState(false);
   const [showLiveCamera, setShowLiveCamera] = useState(false);
   const [showContributeDialog, setShowContributeDialog] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<CountResult | null>(null);
@@ -178,6 +180,16 @@ export function PillCounter() {
               >
                 <Video className="h-5 w-5" />
                 Live Count Mode
+              </Button>
+
+              <Button
+                onClick={() => setShowBulkUpload(true)}
+                variant="ghost"
+                size="lg"
+                className="w-full"
+              >
+                <Upload className="h-5 w-5" />
+                Bulk Upload for Training
               </Button>
 
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
@@ -347,6 +359,12 @@ export function PillCounter() {
           notes={result.notes}
         />
       )}
+
+      {/* Bulk Upload Dialog */}
+      <BulkUploadDialog
+        open={showBulkUpload}
+        onOpenChange={setShowBulkUpload}
+      />
     </div>
   );
 }
