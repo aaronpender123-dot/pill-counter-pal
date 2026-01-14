@@ -9,6 +9,18 @@ const config: CapacitorConfig = {
     Camera: {
       // iOS camera permissions are configured in Info.plist
       // Android camera permissions are configured in AndroidManifest.xml
+    },
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      backgroundColor: '#FFFFFF',
+      androidSplashResourceName: 'splash',
+      androidScaleType: 'CENTER_CROP',
+      showSpinner: false,
+      iosSpinnerStyle: 'small',
+      spinnerColor: '#2BBCBE',
+      splashFullScreen: true,
+      splashImmersive: true,
     }
   },
   ios: {
