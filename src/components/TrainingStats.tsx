@@ -9,12 +9,10 @@ export function TrainingStats() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { count: totalCount, error } = await supabase
-          .from('pill_training_data')
-          .select('*', { count: 'exact', head: true });
+        const { data, error } = await supabase.rpc('get_training_data_count');
 
         if (error) throw error;
-        setCount(totalCount ?? 0);
+        setCount(data ?? 0);
       } catch (err) {
         console.error('Error fetching training stats:', err);
         setCount(0);
