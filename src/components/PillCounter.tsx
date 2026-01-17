@@ -242,10 +242,10 @@ export function PillCounter() {
                         }}
                       >
                         {/* Outer glow ring */}
-                        <div className="absolute inset-0 w-8 h-8 -m-4 rounded-full bg-primary/30 animate-ping" />
+                        <div className="absolute inset-0 w-5 h-5 -m-2.5 rounded-full bg-primary/30 animate-ping" />
                         {/* Main marker dot */}
-                        <div className="relative w-6 h-6 rounded-full bg-primary border-2 border-background shadow-lg flex items-center justify-center">
-                          <span className="text-[10px] font-bold text-primary-foreground">
+                        <div className="relative w-4 h-4 rounded-full bg-primary border border-background shadow-lg flex items-center justify-center">
+                          <span className="text-[7px] font-bold text-primary-foreground">
                             {index + 1}
                           </span>
                         </div>
