@@ -1,7 +1,8 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { SwitchCamera, X, Loader2, Pause, Play } from 'lucide-react';
+import { SwitchCamera, X, Loader2, Pause, Play, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { useNativeCamera } from '@/hooks/useNativeCamera';
 
 interface PillPosition {
   x: number;
@@ -26,16 +27,30 @@ export function LiveCamera({ onClose }: LiveCameraProps) {
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [result, setResult] = useState<CountResult | null>(null);
   const analysisIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastAnalysisRef = useRef<number>(0);
 
+  const { isNative, checkAndRequestPermission } = useNativeCamera();
+
   const startCamera = useCallback(async () => {
     try {
       setError(null);
       setIsReady(false);
+      setPermissionDenied(false);
+      
+      // On native platforms, request permission first using Capacitor
+      if (isNative) {
+        const hasPermission = await checkAndRequestPermission();
+        if (!hasPermission) {
+          setPermissionDenied(true);
+          setError('Camera access was denied. Please enable camera access in your device Settings to use this feature.');
+          return;
+        }
+      }
       
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -60,9 +75,14 @@ export function LiveCamera({ onClose }: LiveCameraProps) {
       }
     } catch (err) {
       console.error('Camera error:', err);
-      setError('Unable to access camera. Please ensure you have granted camera permissions.');
+      if ((err as Error).name === 'NotAllowedError') {
+        setPermissionDenied(true);
+        setError('Camera access was denied. Please enable camera access in your device Settings.');
+      } else {
+        setError('Unable to access camera. Please ensure you have granted camera permissions.');
+      }
     }
-  }, [facingMode, stream]);
+  }, [facingMode, stream, isNative, checkAndRequestPermission]);
 
   const captureFrame = useCallback((): string | null => {
     if (!videoRef.current || !canvasRef.current || !isReady) return null;
@@ -179,7 +199,15 @@ export function LiveCamera({ onClose }: LiveCameraProps) {
         {error ? (
           <div className="absolute inset-0 flex items-center justify-center p-8">
             <div className="text-center text-background">
-              <p className="text-lg">{error}</p>
+              {permissionDenied ? (
+                <Settings className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              ) : null}
+              <p className="text-lg mb-2">{error}</p>
+              {permissionDenied && (
+                <p className="text-sm opacity-75 mb-4">
+                  Go to Settings → PillCount → Camera and enable access
+                </p>
+              )}
               <Button onClick={startCamera} variant="outline" className="mt-4 border-background text-background hover:bg-background hover:text-foreground">
                 Try Again
               </Button>
