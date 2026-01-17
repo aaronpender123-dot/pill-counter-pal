@@ -5,6 +5,7 @@ import { Camera as CameraComponent } from '@/components/Camera';
 import { LiveCamera } from '@/components/LiveCamera';
 import { ContributeDialog } from '@/components/ContributeDialog';
 import { BulkUploadDialog } from '@/components/BulkUploadDialog';
+import { TrainingStats } from '@/components/TrainingStats';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { HealthDisclaimer } from '@/components/HealthDisclaimer';
@@ -331,6 +332,9 @@ export function PillCounter() {
             </div>
           )}
         </main>
+
+        {/* Training Stats */}
+        <TrainingStats />
 
         {/* Tips */}
         <footer className="text-center text-sm text-muted-foreground space-y-4 animate-fade-in">
