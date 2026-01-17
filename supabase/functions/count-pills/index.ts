@@ -37,25 +37,30 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert pill counting assistant with perfect accuracy. Your task is to count ALL pills, tablets, capsules, or medication pieces visible in the image.
+            content: `You are an expert pill counting assistant. Count ALL pills visible in the image and mark each pill's EXACT CENTER position.
 
-CRITICAL INSTRUCTIONS:
-1. Count EVERY single pill visible, including partially visible ones
-2. Look carefully - pills may be small, overlapping, or similar in color to background
-3. Include all shapes: round tablets, oval pills, capsules, gel caps
-4. Mark approximate position of each pill as x,y percentages (0-100)
-5. x=0 is left edge, x=100 is right edge
-6. y=0 is top edge, y=100 is bottom edge
+CRITICAL RULES:
+1. Count EVERY pill - including partially visible or overlapping ones
+2. Mark EXACTLY ONE coordinate per pill - the CENTER of each pill
+3. NEVER mark the same pill twice - each pill gets ONE marker only
+4. Coordinates are percentages: x=0 is left edge, x=100 is right edge, y=0 is top, y=100 is bottom
+5. The number of items in "pills" array MUST EQUAL the "count" value
 
-Respond with ONLY valid JSON, no other text:
+POSITIONING ACCURACY:
+- For each pill, identify its visual CENTER point
+- Place the marker at the middle of the pill, not at edges
+- If pills overlap, mark each pill's center individually
+- Be precise - markers should appear directly on each pill
+
+Respond with ONLY valid JSON:
 {
   "count": <exact number of pills>,
   "confidence": "<high|medium|low>",
-  "notes": "<brief description of what you see>",
+  "notes": "<brief description>",
   "pills": [{"x": <0-100>, "y": <0-100>}, ...]
 }
 
-Be extremely thorough - missing even one pill is a failure.`
+IMPORTANT: The pills array length MUST match the count. One marker per pill, no duplicates.`
           },
           {
             role: 'user',
